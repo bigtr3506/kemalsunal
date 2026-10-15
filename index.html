@@ -3,39 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kemal Sunal TV | 7/24 Kesintisiz Canlı Yayın</title>
+    <title>Kemal Sunal TV | 7/24 Canlı Yayın</title>
     <link rel="icon" href="https://img.youtube.com/vi/guqpuNWQDhc/hqdefault.jpg" type="image/jpeg">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://www.youtube.com" crossorigin>
+    <link rel="preconnect" href="https://i.ytimg.com" crossorigin>
+    <link rel="dns-prefetch" href="https://www.youtube.com">
+    <link rel="dns-prefetch" href="https://i.ytimg.com">
     
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            user-select: none;
-            -webkit-user-select: none;
+            box-sizing: border-box;
+            background: #000;
         }
 
-        body, html {
+        html, body {
             width: 100%;
             height: 100%;
-            background-color: #000;
             overflow: hidden;
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-            color: #fff;
+            background: #000;
         }
 
-        /* 100% Fullscreen Video Broadcast */
+        /* 100% Tam Ekran Gerçek TV Yayını (Butonsuz, Saf Video) */
         .tv-screen {
             position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            background: #000;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             overflow: hidden;
-            z-index: 1;
+            background: #000;
         }
 
         .tv-screen iframe, .tv-screen #ytplayer {
@@ -43,432 +41,121 @@
             top: 50%;
             left: 50%;
             width: 100vw;
-            height: 56.25vw; /* 16:9 ratio */
+            height: 56.25vw; /* 16:9 oranında tam ekran */
             min-height: 100vh;
-            min-width: 177.77vh; /* 16:9 ratio */
+            min-width: 177.77vh; /* 16:9 oranında tam ekran */
             transform: translate(-50%, -50%);
             border: none;
+            outline: none;
             pointer-events: auto;
         }
 
-        /* Ambient TV Watermark / Channel Logo */
-        .channel-logo {
+        /* Gerçek TV Kanalı Köşe Logosu (KEMAL SUNAL TV) */
+        .tv-logo {
             position: absolute;
             top: 24px;
             right: 28px;
             z-index: 10;
             display: flex;
             align-items: center;
-            gap: 10px;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            padding: 8px 16px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            gap: 8px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 13px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: rgba(245, 197, 24, 0.85);
+            text-shadow: 0 2px 8px rgba(0,0,0,0.9);
             pointer-events: none;
-            opacity: 0.85;
-            transition: opacity 0.5s ease;
+            user-select: none;
         }
 
-        .channel-live-dot {
-            width: 10px;
-            height: 10px;
+        .tv-live-dot {
+            width: 8px;
+            height: 8px;
             background-color: #ef4444;
             border-radius: 50%;
-            box-shadow: 0 0 10px #ef4444;
-            animation: live-blink 1.2s infinite;
+            box-shadow: 0 0 8px #ef4444;
+            animation: tv-blink 1.5s infinite;
         }
 
-        @keyframes live-blink {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.3; transform: scale(0.85); }
-        }
-
-        .channel-name {
-            font-family: 'Cinzel', serif;
-            font-size: 14px;
-            font-weight: 900;
-            letter-spacing: 1.5px;
-            color: #f5c518;
-            text-shadow: 0 2px 8px rgba(0,0,0,0.8);
-        }
-
-        /* Minimalist TV Banner (OSD) */
-        .tv-osd {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            right: 30px;
-            max-width: 900px;
-            margin: 0 auto;
-            background: rgba(10, 12, 16, 0.85);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(245, 197, 24, 0.3);
-            border-radius: 20px;
-            padding: 18px 26px;
-            z-index: 10;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 20px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(245, 197, 24, 0.15);
-            transform: translateY(0);
-            opacity: 1;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .tv-osd.hidden {
-            transform: translateY(120%);
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .osd-info {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            flex: 1;
-            min-width: 0;
-        }
-
-        .osd-badge {
-            font-size: 11px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
-            color: #f5c518;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .osd-title {
-            font-size: 20px;
-            font-weight: 800;
-            color: #fff;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .osd-next {
-            font-size: 12px;
-            color: #94a3b8;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .osd-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .osd-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #fff;
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s ease;
-            outline: none;
-        }
-
-        .osd-btn:hover, .osd-btn:focus-visible {
-            background: #f5c518;
-            color: #000;
-            border-color: #f5c518;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(245, 197, 24, 0.4);
-        }
-
-        .osd-btn.active {
-            background: rgba(245, 197, 24, 0.2);
-            color: #f5c518;
-            border-color: #f5c518;
-        }
-
-        /* TV Channel Guide Drawer (Rehber) */
-        .guide-drawer {
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 420px;
-            max-width: 90%;
-            background: rgba(10, 12, 16, 0.94);
-            backdrop-filter: blur(25px);
-            border-left: 1px solid rgba(255, 255, 255, 0.1);
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            transform: translateX(100%);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-            box-shadow: -20px 0 60px rgba(0, 0, 0, 0.9);
-        }
-
-        .guide-drawer.open {
-            transform: translateX(0);
-        }
-
-        .guide-header {
-            padding: 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .guide-header h3 {
-            font-family: 'Cinzel', serif;
-            font-size: 18px;
-            color: #f5c518;
-            letter-spacing: 1px;
-        }
-
-        .guide-close {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            font-size: 22px;
-            cursor: pointer;
-            padding: 4px;
-        }
-
-        .guide-search {
-            padding: 16px 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-        }
-
-        .guide-search input {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            padding: 10px 16px;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 13px;
-            outline: none;
-        }
-
-        .guide-search input:focus {
-            border-color: #f5c518;
-        }
-
-        .guide-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .guide-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid transparent;
-        }
-
-        .guide-item:hover, .guide-item:focus-visible {
-            background: rgba(245, 197, 24, 0.15);
-            border-color: #f5c518;
-        }
-
-        .guide-item.active {
-            background: rgba(245, 197, 24, 0.2);
-            border-color: #f5c518;
-        }
-
-        .guide-thumb {
-            width: 70px;
-            height: 40px;
-            object-fit: cover;
-            border-radius: 6px;
-        }
-
-        .guide-item-title {
-            font-size: 13px;
-            font-weight: 700;
-            color: #fff;
-            line-height: 1.3;
-        }
-
-        /* Unmute Prompt Overlay (for browser autoplay policies) */
-        .unmute-overlay {
-            position: absolute;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 15;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            backdrop-filter: blur(8px);
-            transition: opacity 0.4s ease;
-        }
-
-        .unmute-overlay.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .unmute-box {
-            text-align: center;
-            background: rgba(20, 24, 32, 0.9);
-            border: 2px solid #f5c518;
-            padding: 28px 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.8), 0 0 30px rgba(245, 197, 24, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        .unmute-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-        }
-
-        .unmute-text {
-            font-size: 20px;
-            font-weight: 800;
-            color: #fff;
-            margin-bottom: 6px;
-        }
-
-        .unmute-sub {
-            font-size: 13px;
-            color: #94a3b8;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-        }
-
-        @media (max-width: 768px) {
-            .tv-osd {
-                bottom: 16px;
-                left: 16px;
-                right: 16px;
-                padding: 14px 18px;
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 12px;
-            }
-            .osd-controls {
-                width: 100%;
-                justify-content: space-between;
-            }
-            .channel-logo {
-                top: 16px;
-                right: 16px;
-                padding: 6px 12px;
-            }
+        @keyframes tv-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
     </style>
 </head>
 <body>
 
-    <!-- 100% Fullscreen Video Screen -->
-    <div class="tv-screen" id="tvScreen">
+    <!-- 100% Tam Ekran TV Ekranı -->
+    <div class="tv-screen">
         <div id="ytplayer"></div>
     </div>
 
-    <!-- Live Channel Watermark -->
-    <div class="channel-logo">
-        <div class="channel-live-dot"></div>
-        <div class="channel-name">KEMAL SUNAL TV</div>
-    </div>
-
-    <!-- Initial Click to Unmute Overlay (Required by Web Browsers) -->
-    <div class="unmute-overlay" id="unmuteOverlay">
-        <div class="unmute-box">
-            <div class="unmute-icon">📺</div>
-            <div class="unmute-text">YAYINI BAŞLAT</div>
-            <div class="unmute-sub">7/24 Kesintisiz Kemal Sunal Kuşağı (Sesli ve Full HD)</div>
-        </div>
-    </div>
-
-    <!-- Minimalist TV Banner / OSD -->
-    <div class="tv-osd" id="tvOsd">
-        <div class="osd-info">
-            <div class="osd-badge">
-                <span>🔴 CANLI YAYIN</span>
-                <span id="osdIndexBadge">(1 / 87)</span>
-            </div>
-            <div class="osd-title" id="osdTitle">Tosun Paşa</div>
-            <div class="osd-next" id="osdNextTitle">Sıradaki: Yükleniyor...</div>
-        </div>
-
-        <div class="osd-controls">
-            <button class="osd-btn" id="btnNext" title="Sonraki Filme Geç (Sağ Ok)">
-                <span>⏭️</span>
-                <span>Sıradaki</span>
-            </button>
-            <button class="osd-btn" id="btnShuffle" title="Karışık Mod (S Tuşu)">
-                <span>🔀</span>
-                <span>Karışık</span>
-            </button>
-            <button class="osd-btn" id="btnGuide" title="Film Rehberi (L Tuşu)">
-                <span>📋</span>
-                <span>Rehber</span>
-            </button>
-            <button class="osd-btn" id="btnFullscreen" title="Tam Ekran (F Tuşu)">
-                <span>📺</span>
-                <span>Tam Ekran</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Channel Guide Drawer -->
-    <div class="guide-drawer" id="guideDrawer">
-        <div class="guide-header">
-            <h3>KANAL REHBERİ (87 Film)</h3>
-            <button class="guide-close" id="btnCloseGuide">✕</button>
-        </div>
-        <div class="guide-search">
-            <input type="text" id="guideSearchInput" placeholder="Film ara (Şark Bülbülü, Tosun Paşa)...">
-        </div>
-        <div class="guide-list" id="guideList"></div>
+    <!-- Kanal Logosu -->
+    <div class="tv-logo">
+        <div class="tv-live-dot"></div>
+        <span>KEMAL SUNAL TV</span>
     </div>
 
     <!-- YouTube IFrame API -->
     <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
-        const MOVIES = [{"id": "guqpuNWQDhc", "title": "Tosun Paşa", "rawTitle": "Tosun Paşa | FULL HD", "duration": 5139}, {"id": "rRDBKB6NHuY", "title": "Şark Bülbülü", "rawTitle": "Şark Bülbülü - Türk Filmi (Kemal Sunal)", "duration": 5323}, {"id": "ZDoLID8feBU", "title": "Şaban Oğlu Şaban", "rawTitle": "Şaban Oğlu Şaban | FULL HD", "duration": 5413}, {"id": "KRy20M7uQM4", "title": "Süt Kardeşler", "rawTitle": "Süt Kardeşler | FULL HD", "duration": 4833}, {"id": "stOXnCPxOws", "title": "Kibar Feyzo", "rawTitle": "Kibar Feyzo | FULL HD", "duration": 5014}, {"id": "xs9XUjHvZsM", "title": "Çöpçüler Kralı", "rawTitle": "Çöpçüler Kralı | FULL HD", "duration": 4750}, {"id": "R7ttwk9kQ8s", "title": "Kapıcılar Kralı 1976 & Sevda Ferdağ", "rawTitle": "Kapıcılar Kralı (1976) - Türk Filmi (Kemal Sunal & Sevda Ferdağ)", "duration": 5023}, {"id": "-25lN6CGI1I", "title": "Korkusuz Korkak Turkish Movie", "rawTitle": "Korkusuz Korkak Türk Filmi | FULL HD |  Subtitled | Turkish Movie | KEMAL SUNAL", "duration": 4589}, {"id": "BTh074l83vI", "title": "Sahte Kabadayı", "rawTitle": "Sahte Kabadayı | HD Türk Filmi (KEMAL SUNAL)", "duration": 4585}, {"id": "gPbAredRRqw", "title": "Yedi Bela Hüsnü Oya Aydoğan", "rawTitle": "Yedi Bela Hüsnü Türk Filmi | FULL HD | Kemal Sunal | Oya Aydoğan", "duration": 4989}, {"id": "wmPSBa1SRA4", "title": "Üç Kağıtçı", "rawTitle": "Üç Kağıtçı Türk Filmi | FULL HD | Kemal Sunal Filmleri", "duration": 4888}, {"id": "bcge5mSX090", "title": "Davaro &", "rawTitle": "Davaro - Tek Parça - Kemal Sunal & Şener Şen", "duration": 5642}, {"id": "RCcO3Zh4ths", "title": "Şendul Şaban Türk Film", "rawTitle": "Şendul Şaban - HD Türk Film (Kemal Sunal)", "duration": 5611}, {"id": "w9wgwBM3pQo", "title": "Postacı Eski", "rawTitle": "Postacı | Kemal Sunal Eski Türk Filmi Tek Parça (Restorasyonlu)", "duration": 4923}, {"id": "IpNb0BwkI2M", "title": "Ortadirek Şaban Eski", "rawTitle": "Ortadirek Şaban - Eski Türk Filmi (Restorasyonlu)", "duration": 5131}, {"id": "GOZ7Waq9VkQ", "title": "Tokatçı", "rawTitle": "Tokatçı - HD Türk Filmi (KEMAL SUNAL)", "duration": 4708}, {"id": "T0lBFkkEY3A", "title": "Doktor Civanım 😎", "rawTitle": "Doktor Civanım 😎 | FULL İZLE", "duration": 5142}, {"id": "csbsGPMmKDY", "title": "Kılıbık Eski", "rawTitle": "Kılıbık | Eski Türk Filmi Tek Parça (Kemal Sunal)", "duration": 5059}, {"id": "G7oxi4tq0Bk", "title": "Atla Gel Şaban", "rawTitle": "Atla Gel Şaban - HD Türk Filmi (KEMAL SUNAL)", "duration": 4949}, {"id": "XrpZje7tPd4", "title": "Şaşkın Damat", "rawTitle": "Şaşkın Damat Türk Filmi | FULL HD | KEMAL SUNAL", "duration": 4313}, {"id": "fPkQ_2dQRUw", "title": "İnek Şaban", "rawTitle": "İnek Şaban | Kemal Sunal Türk Filmi Tek Parça", "duration": 5169}, {"id": "hHNdISbONpk", "title": "Devlet Kuşu Eski", "rawTitle": "Devlet Kuşu | Eski Türk Filmi Tek Parça (Kemal Sunal)", "duration": 4723}, {"id": "lTf-lxBbeFY", "title": "Gerzek Şaban", "rawTitle": "Gerzek Şaban - HD Türk Filmi (KEMAL SUNAL)", "duration": 5001}, {"id": "zRGKIhBg-Rk", "title": "Deli Deli Küpeli Eski", "rawTitle": "Deli Deli Küpeli | Eski Türk Filmi Tek Parça (Kemal Sunal)", "duration": 5450}, {"id": "GySuqiTfZcw", "title": "Japon İşi", "rawTitle": "Japon İşi - HD Türk Filmi (Kemal Sunal)", "duration": 5342}, {"id": "8eSZHKpr4Kg", "title": "Sevimli Hırsız Türk Film", "rawTitle": "Sevimli Hırsız - HD Türk Film (Kemal Sunal)", "duration": 5147}, {"id": "qkgAExh2WBw", "title": "Uyanık Gazeteci", "rawTitle": "Uyanık Gazeteci Türk Filmi | FULL HD | KEMAL SUNAL", "duration": 5416}, {"id": "eN41guxlp0c", "title": "Öğretmen Eski", "rawTitle": "Öğretmen | Kemal Sunal Eski Türk Filmi Tek Parça (Restorasyonlu)", "duration": 5827}, {"id": "RPBofKLiBzU", "title": "Polizei", "rawTitle": "POLIZEI - HD Türk Filmi (Kemal Sunal)", "duration": 5183}, {"id": "WdGv4-VTCLI", "title": "Talih Kuşu , Yasemin Yalçın", "rawTitle": "Talih Kuşu | Kemal Sunal, Yasemin Yalçın | Türk Filmi | Full HD", "duration": 6414}, {"id": "So6b5qua_zc", "title": "Gülen Adam", "rawTitle": "Gülen Adam - HD Türk Filmi ( Kemal Sunal)", "duration": 5428}, {"id": "lH977qBfMKc", "title": "Gülen Adam Full", "rawTitle": "Gülen Adam Türk Filmi | FULL | 4K ULTRA HD | KEMAL SUNAL", "duration": 5429}, {"id": "4rAnNKCxlnc", "title": "Hababam Sınıfı Uyanıyor", "rawTitle": "Hababam Sınıfı Uyanıyor | FULL HD", "duration": 5741}, {"id": "hf2-8MRPGu8", "title": "Hababam Sınıfı (1975)", "rawTitle": "Hababam Class | FULL HD", "duration": 5110}, {"id": "6M2N1dztNU0", "title": "Hababam Sınıfı Sınıfta Kaldı", "rawTitle": "Hababam Sınıfı Sınıfta Kaldı | FULL HD", "duration": 5542}, {"id": "3Y8nUzSbTrE", "title": "Hababam Sınıfı Tatilde", "rawTitle": "Hababam Sınıfı Tatilde | Full HD", "duration": 5812}, {"id": "0aPemUexAk4", "title": "Mavi Boncuk", "rawTitle": "The Blue Bead | FULL HD", "duration": 4587}, {"id": "5Q_wKlkCJsU", "title": "Tatlı Dillim", "rawTitle": "My Sweetheart | Domestic Film Full Movie (FULL HD)", "duration": 5493}, {"id": "lSu7Wc5lgXc", "title": "Salako", "rawTitle": "Salako | FULL HD", "duration": 5115}, {"id": "yM2r8H8A_P0", "title": "Köyden İndim Şehire", "rawTitle": "Köyden İndim Şehire | FULL HD", "duration": 4911}, {"id": "wgG6xlQ1jx8", "title": "Salak Milyoner", "rawTitle": "Salak Milyoner | Full HD", "duration": 4907}, {"id": "4J3ulqHkgRM", "title": "Sakar Şaki̇r", "rawTitle": "Sakar ŞAKİR - HD Türk Filmi (Kemal Sunal)", "duration": 4898}, {"id": "xfn2PgMDYxw", "title": "Yoksul 1986 & Yaman Okay", "rawTitle": "YOKSUL (1986) - Kemal Sunal & Yaman Okay | RESTORASYONLU", "duration": 4616}, {"id": "eedUtTFLYsQ", "title": "Şabani̇ye", "rawTitle": "ŞABANİYE - HD Türk Filmi (Kemal Sunal)", "duration": 5879}, {"id": "w7bwBts_d1U", "title": "Güllü Geliyor Güllü", "rawTitle": "The Weirdo | Classic Turkish Movie by Kemal Sunal Full Movie", "duration": 5371}, {"id": "zLc3Eh7uO2s", "title": "Dokunmayın Şabanıma Eski", "rawTitle": "Dokunmayın Şabanıma | Kemal Sunal Eski Türk Filmi Tek Parça", "duration": 4735}, {"id": "Z7oLqdR2zIA", "title": "Yüz Numaralı Adam Eski", "rawTitle": "Yüz Numaralı Adam | Kemal Sunal  Eski Türk Filmi Tek Parça", "duration": 4903}, {"id": "-ucnLbAmfTQ", "title": "Meraklı Köfteci", "rawTitle": "Meraklı Köfteci - HD Türk Filmi (Kemal Sunal)", "duration": 4310}, {"id": "4EJ62o4u4ug", "title": "Sosyete Şaban", "rawTitle": "Sosyete Şaban - HD Türk Filmi (Kemal Sunal)", "duration": 5522}, {"id": "HBRD_HbCwHE", "title": "Oh Olsun", "rawTitle": "Serves You Right | FULL HD", "duration": 5161}, {"id": "kVyvF84zEaA", "title": "Keriz , Perihan Savaş", "rawTitle": "Keriz | Kemal Sunal, Perihan Savaş | Türk Filmi | Full HD", "duration": 5921}, {"id": "Fy-tddSA-5Y", "title": "Köşeyi Dönen Adam 1978", "rawTitle": "Köşeyi Dönen Adam (1978) - Kemal Sunal (HD)", "duration": 4468}, {"id": "16Bv7GAoH4c", "title": "Varyemez , Yasemin Yalçın", "rawTitle": "Varyemez | Kemal Sunal, Yasemin Yalçın | Türk Filmi | Full HD", "duration": 5423}, {"id": "G62FPi5NYsU", "title": "Şaban Pabucu Yarım", "rawTitle": "Şaban Pabucu Yarım - HD Türk Filmi (Kemal Sunal)", "duration": 5615}, {"id": "pQ9GgiPPYnc", "title": "Davacı", "rawTitle": "Davacı - HD Türk Filmi (Kemal Sunal)", "duration": 4746}, {"id": "piFzdcn0iEY", "title": "Umudumuz Şaban Eski", "rawTitle": "Umudumuz Şaban - Eski Türk Filmi Tek Parça (Restorasyonlu)", "duration": 4917}, {"id": "bOu4OJaA1Wc", "title": "En Büyük Şaban", "rawTitle": "En Büyük Şaban - HD Türk Filmi (Kemal Sunal)", "duration": 5721}, {"id": "8d97CGyglS4", "title": "Bekçiler Kralı Eski", "rawTitle": "Bekçiler Kralı | Eski Türk Filmi Tek Parça (Kemal Sunal)", "duration": 4983}, {"id": "X1sL0IMFzP8", "title": "İnatçı", "rawTitle": "İnatçı - HD Türk Filmi (Kemal Sunal)", "duration": 5083}, {"id": "aQuDq8w2MXQ", "title": "Avanak Apti", "rawTitle": "Avanak Apti - HD Türk Filmi (Kemal Sunal)", "duration": 4917}, {"id": "AAldCMXkTJM", "title": "Yalancı Yarim", "rawTitle": "Yalancı Yarim | Yerli Film Tek Parça (FULL HD)", "duration": 5667}, {"id": "GICo5W3fEaw", "title": "Çarıklı Milyoner", "rawTitle": "Çarıklı Milyoner - HD Türk Filmi (Kemal Sunal)", "duration": 5356}, {"id": "vNeTCNXJXJA", "title": "The Goal King Classic Turkish Film Full Movie", "rawTitle": "The Goal King | Kemal Sunal Classic Turkish Film Full Movie (Restored)", "duration": 4825}, {"id": "WE0tU8cJ1Ps", "title": "Tarzan Rıfkı", "rawTitle": "Tarzan Rıfkı - HD Türk Filmi (Kemal Sunal)", "duration": 5111}, {"id": "9wOPLOm0Dlc", "title": "Koltuk Belası", "rawTitle": "Koltuk Belası - HD Türk Filmi Kemal Sunal", "duration": 5173}, {"id": "aMDcX2tG-NM", "title": "Katma Değer Şaban Eski", "rawTitle": "Katma Değer Şaban - Eski Türk Filmi Tek Parça (Restorasyonlu)", "duration": 5206}, {"id": "pJxXU16tx1o", "title": "Zehir Hafiye Full Film", "rawTitle": "Zehir Hafiye | Kemal Sunal | Full Film İzle", "duration": 5148}, {"id": "4nRQCiaSg-U", "title": "Kiracı Eski", "rawTitle": "Kiracı | Kemal Sunal Eski Türk Filmi Tek Parça", "duration": 5536}, {"id": "0ME6gEQWdSI", "title": "Abuk Sabuk 1 Film", "rawTitle": "Abuk Sabuk 1 Film - HD Türk Filmi (Kemal Sunal)", "duration": 5511}, {"id": "Mt0f-RqDDVQ", "title": "Kanlı Nigar Eski", "rawTitle": "Kanlı Nigar | Kemal Sunal Eski Türk Filmi Tek Parça (Restorasyonlu)", "duration": 4864}, {"id": "zrxWh5zKe4I", "title": "Propaganda 1999", "rawTitle": "Propaganda (1999)", "duration": 6222}, {"id": "C8leqNYSbrk", "title": "Bıçkın", "rawTitle": "Bıçkın | Kemal Sunal Türk Filmi", "duration": 4870}, {"id": "BMMfgxm_C4c", "title": "Düttürü Dünya 1988", "rawTitle": "Düttürü Dünya (1988) - Türk Filmi (Kemal Sunal)", "duration": 5335}, {"id": "2x1k44qhRAg", "title": "Yakışıklı Eski", "rawTitle": "Yakışıklı | Kemal Sunal Eski Türk Filmi Tek Parça", "duration": 5310}, {"id": "uY4pUWRnuu4", "title": "Güllü Geliyor Güllü Eski", "rawTitle": "Güllü Geliyor Güllü - Eski Türk Filmi Tek Parça (Restorasyonlu)", "duration": 5124}, {"id": "hKjlPfgW0NE", "title": "Boynu Bükük Küheylan", "rawTitle": "Boynu Bükük Küheylan - HD Türk Filmi", "duration": 5062}, {"id": "7FKQauKZKsI", "title": "Longing", "rawTitle": "Longing | FULL HD", "duration": 5554}, {"id": "8j_njwgTdkc", "title": "Güllü Geliyor Güllü Türkan Şoray Ediz Hun Eski", "rawTitle": "Güllü Geliyor Güllü | Türkan Şoray -  Ediz Hun Eski Türk Filmi", "duration": 5124}, {"id": "Vfs1uAbef_A", "title": "Canım Kardeşim 1973", "rawTitle": "Canım Kardeşim (1973) | Restorasyonlu (Full HD)", "duration": 5489}, {"id": "qLTO2JqtLvk", "title": "Hanzo Meral Zeren", "rawTitle": "HANZO Türk Filmi | FULL HD | KEMAL SUNAL | MERAL ZEREN", "duration": 4733}, {"id": "k05TvAwf0UU", "title": "İbo İle Güllüşah", "rawTitle": "İbo İle Güllüşah - HD Türk Filmi (Kemal Sunal)", "duration": 5328}, {"id": "3yDpAHN3lWc", "title": "İyi Aile Çocuğu", "rawTitle": "İyi Aile Çocuğu Türk Filmi | FULL HD | Kemal Sunal Filmleri", "duration": 4657}, {"id": "Lom8SHAsXA8", "title": "Yakışıklı", "rawTitle": "Yakışıklı | Kemal Sunal Komedi Filmi İzle", "duration": 5003}, {"id": "a05gvIsIm-I", "title": "The Tough Guy Full Length", "rawTitle": "The Tough Guy - Classic Turkish Movie Full Length", "duration": 4870}, {"id": "lj1EZStxiBs", "title": "Güllü Geliyor Güllü / 1973 Türkan Şoray , Ediz Hun , Bülent Kayabaş , , İhsan Yüce", "rawTitle": "GÜLLÜ geliyor GÜLLÜ / 1973  Türkan Şoray , Ediz Hun , Bülent Kayabaş ,  Kemal Sunal ,  İhsan Yüce", "duration": 5142}, {"id": "vIA9hTcrkw8", "title": "The Simpleton Millionaire Movie , Zeki Alasya, Metin Akpınar, Halit Akç...", "rawTitle": "The Simpleton Millionaire - 4K Yeşilçam Movie (Kemal Sunal, Zeki Alasya, Metin Akpınar, Halit Akç...", "duration": 4927}, {"id": "ZvXzoYwm-GU", "title": "Tosun Pasha Full , ,", "rawTitle": "Tosun Pasha - RESTORED 4K FULL (Kemal Sunal, Şener Şen, Müjde Ar)", "duration": 5139}];
+        // 87 Filmin Listesi ve Süreleri [YouTubeID, Saniye]
+        const MOVIES = [
+            ["guqpuNWQDhc", 5139], ["rRDBKB6NHuY", 5323], ["ZDoLID8feBU", 5413], ["KRy20M7uQM4", 4833],
+            ["stOXnCPxOws", 5014], ["xs9XUjHvZsM", 4750], ["R7ttwk9kQ8s", 5023], ["-25lN6CGI1I", 4589],
+            ["BTh074l83vI", 4585], ["gPbAredRRqw", 4989], ["wmPSBa1SRA4", 4888], ["bcge5mSX090", 5642],
+            ["RCcO3Zh4ths", 5611], ["w9wgwBM3pQo", 4923], ["IpNb0BwkI2M", 5131], ["GOZ7Waq9VkQ", 4708],
+            ["T0lBFkkEY3A", 5142], ["csbsGPMmKDY", 5059], ["G7oxi4tq0Bk", 4949], ["XrpZje7tPd4", 4313],
+            ["fPkQ_2dQRUw", 5169], ["hHNdISbONpk", 4723], ["lTf-lxBbeFY", 5001], ["zRGKIhBg-Rk", 5450],
+            ["GySuqiTfZcw", 5342], ["8eSZHKpr4Kg", 5147], ["qkgAExh2WBw", 5416], ["eN41guxlp0c", 5827],
+            ["RPBofKLiBzU", 5183], ["WdGv4-VTCLI", 6414], ["So6b5qua_zc", 5428], ["lH977qBfMKc", 5429],
+            ["4rAnNKCxlnc", 5741], ["hf2-8MRPGu8", 5110], ["6M2N1dztNU0", 5542], ["3Y8nUzSbTrE", 5812],
+            ["0aPemUexAk4", 4587], ["5Q_wKlkCJsU", 5493], ["lSu7Wc5lgXc", 5115], ["yM2r8H8A_P0", 4911],
+            ["wgG6xlQ1jx8", 4907], ["4J3ulqHkgRM", 4898], ["xfn2PgMDYxw", 4616], ["eedUtTFLYsQ", 5879],
+            ["w7bwBts_d1U", 5371], ["zLc3Eh7uO2s", 4735], ["Z7oLqdR2zIA", 4903], ["-ucnLbAmfTQ", 4310],
+            ["4EJ62o4u4ug", 5522], ["HBRD_HbCwHE", 5161], ["kVyvF84zEaA", 5921], ["Fy-tddSA-5Y", 4468],
+            ["16Bv7GAoH4c", 5423], ["G62FPi5NYsU", 5615], ["pQ9GgiPPYnc", 4746], ["piFzdcn0iEY", 4917],
+            ["bOu4OJaA1Wc", 5721], ["8d97CGyglS4", 4983], ["X1sL0IMFzP8", 5083], ["aQuDq8w2MXQ", 4917],
+            ["AAldCMXkTJM", 5667], ["GICo5W3fEaw", 5356], ["vNeTCNXJXJA", 4825], ["WE0tU8cJ1Ps", 5111],
+            ["9wOPLOm0Dlc", 5173], ["aMDcX2tG-NM", 5206], ["pJxXU16tx1o", 5148], ["4nRQCiaSg-U", 5536],
+            ["0ME6gEQWdSI", 5511], ["Mt0f-RqDDVQ", 4864], ["zrxWh5zKe4I", 6222], ["C8leqNYSbrk", 4870],
+            ["BMMfgxm_C4c", 5335], ["2x1k44qhRAg", 5310], ["uY4pUWRnuu4", 5124], ["hKjlPfgW0NE", 5062],
+            ["7FKQauKZKsI", 5554], ["8j_njwgTdkc", 5124], ["Vfs1uAbef_A", 5489], ["qLTO2JqtLvk", 4733],
+            ["k05TvAwf0UU", 5328], ["3yDpAHN3lWc", 4657], ["Lom8SHAsXA8", 5003], ["a05gvIsIm-I", 4870],
+            ["lj1EZStxiBs", 5142], ["vIA9hTcrkw8", 4927], ["ZvXzoYwm-GU", 5139]
+        ];
 
         let player = null;
-        let currentIndex = 0;
-        let isShuffle = false;
-        let osdTimeout = null;
-        let userInteracted = false;
+        let currentIdx = 0;
 
-        // Load saved movie index or pick random
-        const savedIndex = localStorage.getItem('kstv_current_index');
-        if (savedIndex !== null && !isNaN(savedIndex) && savedIndex >= 0 && savedIndex < MOVIES.length) {
-            currentIndex = parseInt(savedIndex);
+        // Gerçek Dünya Saatiyle Eşit Canlı Yayın Hesaplama (Filmin ortasından başlar)
+        function getLiveBroadcast() {
+            const totalDuration = MOVIES.reduce((acc, m) => acc + m[1], 0);
+            const now = Math.floor(Date.now() / 1000);
+            let timeInCycle = now % totalDuration;
+
+            for (let i = 0; i < MOVIES.length; i++) {
+                const dur = MOVIES[i][1];
+                if (timeInCycle < dur) {
+                    return {
+                        index: i,
+                        id: MOVIES[i][0],
+                        startSeconds: Math.floor(timeInCycle)
+                    };
+                }
+                timeInCycle -= dur;
+            }
+            return { index: 0, id: MOVIES[0][0], startSeconds: 0 };
         }
 
-        // YouTube API Ready
         function onYouTubeIframeAPIReady() {
-            const current = MOVIES[currentIndex];
+            const live = getLiveBroadcast();
+            currentIdx = live.index;
+
             player = new YT.Player('ytplayer', {
-                videoId: current.id,
+                videoId: live.id,
                 playerVars: {
                     autoplay: 1,
                     controls: 0,
@@ -477,7 +164,8 @@
                     modestbranding: 1,
                     rel: 0,
                     playsinline: 1,
-                    iv_load_policy: 3
+                    iv_load_policy: 3,
+                    start: live.startSeconds // O anki canlı saniyesinden başlar
                 },
                 events: {
                     'onReady': onPlayerReady,
@@ -488,210 +176,50 @@
         }
 
         function onPlayerReady(event) {
-            // Set 1080p full quality
             if (player.setPlaybackQuality) {
                 player.setPlaybackQuality('hd1080');
             }
-            player.playVideo();
-            updateOSD();
-            renderGuide();
-            resetOsdTimer();
+            // Otomatik başlatma
+            const p = player.playVideo();
+            if (p && p.catch) {
+                p.catch(() => {
+                    player.mute();
+                    player.playVideo();
+                });
+            }
         }
 
-        // Automatic 24/7 transition when video ends
+        // Film bitince sıradakine otomatik geç (7/24 döngü)
         function onPlayerStateChange(event) {
             if (event.data === YT.PlayerState.PLAYING) {
                 if (player.setPlaybackQuality) {
                     player.setPlaybackQuality('hd1080');
                 }
-                updateOSD();
-                resetOsdTimer();
             } else if (event.data === YT.PlayerState.ENDED) {
-                // Seamlessly play next movie!
-                playNextMovie();
+                currentIdx = (currentIdx + 1) % MOVIES.length;
+                player.loadVideoById({
+                    videoId: MOVIES[currentIdx][0],
+                    startSeconds: 0,
+                    suggestedQuality: 'hd1080'
+                });
             }
         }
 
         function onPlayerError(event) {
-            console.warn('Video hatası, sıradaki filme geçiliyor...', event.data);
-            setTimeout(playNextMovie, 1500);
-        }
-
-        function playMovieByIndex(index) {
-            if (index < 0 || index >= MOVIES.length) index = 0;
-            currentIndex = index;
-            localStorage.setItem('kstv_current_index', currentIndex);
-
-            const movie = MOVIES[currentIndex];
-            if (player && player.loadVideoById) {
-                player.loadVideoById({
-                    videoId: movie.id,
-                    suggestedQuality: 'hd1080'
-                });
-            }
-
-            updateOSD();
-            highlightGuideItem();
-            showOSD();
-            resetOsdTimer();
-        }
-
-        function playNextMovie() {
-            if (isShuffle) {
-                let nextIdx = Math.floor(Math.random() * MOVIES.length);
-                if (nextIdx === currentIndex) nextIdx = (nextIdx + 1) % MOVIES.length;
-                playMovieByIndex(nextIdx);
-            } else {
-                playMovieByIndex((currentIndex + 1) % MOVIES.length);
-            }
-        }
-
-        function updateOSD() {
-            const current = MOVIES[currentIndex];
-            const nextIdx = (currentIndex + 1) % MOVIES.length;
-            const nextMovie = MOVIES[nextIdx];
-
-            document.getElementById('osdTitle').textContent = current.title;
-            document.getElementById('osdIndexBadge').textContent = `(${currentIndex + 1} / ${MOVIES.length})`;
-            document.getElementById('osdNextTitle').textContent = `Sıradaki: ${nextMovie.title}`;
-            document.title = `📺 ${current.title} | Kemal Sunal TV`;
-        }
-
-        function showOSD() {
-            const osd = document.getElementById('tvOsd');
-            osd.classList.remove('hidden');
-        }
-
-        function hideOSD() {
-            const osd = document.getElementById('tvOsd');
-            osd.classList.add('hidden');
-        }
-
-        function resetOsdTimer() {
-            showOSD();
-            if (osdTimeout) clearTimeout(osdTimeout);
-            osdTimeout = setTimeout(() => {
-                hideOSD();
-            }, 6000);
-        }
-
-        // Wake OSD on mouse move, touch or key press
-        window.addEventListener('mousemove', resetOsdTimer);
-        window.addEventListener('touchstart', resetOsdTimer);
-
-        // Guide rendering
-        function renderGuide(filterText = '') {
-            const list = document.getElementById('guideList');
-            list.innerHTML = '';
-            const query = filterText.toLowerCase().trim();
-
-            MOVIES.forEach((movie, idx) => {
-                if (query && !movie.title.toLowerCase().includes(query)) return;
-
-                const item = document.createElement('div');
-                item.className = 'guide-item' + (idx === currentIndex ? ' active' : '');
-                item.id = 'guide-item-' + idx;
-                item.innerHTML = `
-                    <img class="guide-thumb" src="https://img.youtube.com/vi/${movie.id}/hqdefault.jpg" alt="${movie.title}">
-                    <div class="guide-item-title">${idx + 1}. ${movie.title}</div>
-                `;
-
-                item.addEventListener('click', () => {
-                    playMovieByIndex(idx);
-                    document.getElementById('guideDrawer').classList.remove('open');
-                });
-
-                list.appendChild(item);
+            currentIdx = (currentIdx + 1) % MOVIES.length;
+            player.loadVideoById({
+                videoId: MOVIES[currentIdx][0],
+                startSeconds: 0,
+                suggestedQuality: 'hd1080'
             });
         }
 
-        function highlightGuideItem() {
-            document.querySelectorAll('.guide-item').forEach(it => it.classList.remove('active'));
-            const active = document.getElementById('guide-item-' + currentIndex);
-            if (active) {
-                active.classList.add('active');
-                active.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
-        }
-
-        // Guide events
-        document.getElementById('btnGuide').addEventListener('click', (e) => {
-            e.stopPropagation();
-            document.getElementById('guideDrawer').classList.add('open');
-            highlightGuideItem();
-        });
-
-        document.getElementById('btnCloseGuide').addEventListener('click', () => {
-            document.getElementById('guideDrawer').classList.remove('open');
-        });
-
-        document.getElementById('guideSearchInput').addEventListener('input', (e) => {
-            renderGuide(e.target.value);
-        });
-
-        // Controls
-        document.getElementById('btnNext').addEventListener('click', (e) => {
-            e.stopPropagation();
-            playNextMovie();
-        });
-
-        const btnShuffle = document.getElementById('btnShuffle');
-        btnShuffle.addEventListener('click', (e) => {
-            e.stopPropagation();
-            isShuffle = !isShuffle;
-            btnShuffle.classList.toggle('active', isShuffle);
-            resetOsdTimer();
-        });
-
-        document.getElementById('btnFullscreen').addEventListener('click', (e) => {
-            e.stopPropagation();
-            toggleFullscreen();
-        });
-
-        function toggleFullscreen() {
-            if (!document.fullscreenElement) {
-                document.documentElement.requestFullscreen().catch(() => {});
-            } else {
-                if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
-            }
-        }
-
-        // Unmute Overlay
-        const unmuteOverlay = document.getElementById('unmuteOverlay');
-        unmuteOverlay.addEventListener('click', () => {
-            userInteracted = true;
-            unmuteOverlay.classList.add('hidden');
-            if (player) {
+        // Ekrana ilk dokunulduğunda ses kapalıysa sesi aç
+        window.addEventListener('click', () => {
+            if (player && player.isMuted && player.isMuted()) {
                 player.unMute();
-                player.playVideo();
-                if (player.setPlaybackQuality) {
-                    player.setPlaybackQuality('hd1080');
-                }
             }
-            resetOsdTimer();
-        });
-
-        // Keyboard & TV Remote Navigation
-        window.addEventListener('keydown', (e) => {
-            resetOsdTimer();
-            if (e.target.tagName === 'INPUT') return;
-
-            if (e.key === 'ArrowRight' || e.key === 'n' || e.key === 'N') {
-                playNextMovie();
-            } else if (e.key === 'f' || e.key === 'F') {
-                toggleFullscreen();
-            } else if (e.key === 's' || e.key === 'S') {
-                isShuffle = !isShuffle;
-                btnShuffle.classList.toggle('active', isShuffle);
-            } else if (e.key === 'l' || e.key === 'L') {
-                document.getElementById('guideDrawer').classList.toggle('open');
-            } else if (e.key === 'Escape') {
-                document.getElementById('guideDrawer').classList.remove('open');
-            }
-        });
-
-        // Initial setup
-        updateOSD();
+        }, { once: true });
     </script>
 </body>
 </html>
