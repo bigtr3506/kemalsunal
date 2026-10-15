@@ -5,13 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kemal Sunal TV | 7/24 Canlı Yayın</title>
     
-    <!-- En Hızlı Bağlantı İçin YouTube CDN Önbellekleme -->
     <link rel="preconnect" href="https://www.youtube.com" crossorigin>
-    <link rel="preconnect" href="https://www.youtube-nocookie.com" crossorigin>
     <link rel="preconnect" href="https://i.ytimg.com" crossorigin>
-    <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossorigin>
-    <link rel="dns-prefetch" href="https://www.youtube.com">
-    <link rel="dns-prefetch" href="https://www.youtube-nocookie.com">
     
     <style>
         * {
@@ -27,6 +22,7 @@
             overflow: hidden;
             background: #000;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            color: #fff;
         }
 
         /* 100% Tam Ekran TV Ekranı */
@@ -45,12 +41,13 @@
             top: 50%;
             left: 50%;
             width: 100vw;
-            height: 56.25vw; /* 16:9 oran */
+            height: 56.25vw;
             min-height: 100vh;
-            min-width: 177.77vh; /* 16:9 oran */
+            min-width: 177.77vh;
             transform: translate(-50%, -50%);
             border: none;
             outline: none;
+            pointer-events: auto;
         }
 
         /* TV Kanal Logosu */
@@ -69,7 +66,7 @@
             text-shadow: 0 2px 8px rgba(0,0,0,0.9);
             pointer-events: none;
             user-select: none;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             padding: 6px 14px;
             border-radius: 20px;
             backdrop-filter: blur(8px);
@@ -89,43 +86,48 @@
             50% { opacity: 0.3; }
         }
 
-        /* Kanal Açılış / Geçiş Bilgi Şeridi */
-        .tune-banner {
+        /* Sesi Aç Floating Rozeti (Eğer Tarayıcı Sesi Kısarak Başlattıysa) */
+        .unmute-badge {
             position: absolute;
-            bottom: 30px;
-            left: 30px;
-            z-index: 10;
-            background: rgba(10, 12, 16, 0.85);
-            backdrop-filter: blur(12px);
-            border-left: 4px solid #f5c518;
-            padding: 12px 20px;
-            border-radius: 8px;
-            color: #fff;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-            transition: opacity 0.8s ease;
-            pointer-events: none;
-        }
-
-        .tune-banner.hidden {
-            opacity: 0;
-        }
-
-        .tune-title {
-            font-size: 16px;
+            top: 24px;
+            left: 28px;
+            z-index: 20;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245, 197, 24, 0.95);
+            color: #000;
+            font-size: 13px;
             font-weight: 800;
-            color: #f5c518;
+            padding: 8px 18px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(245, 197, 24, 0.5);
+            animation: bounce 2s infinite;
         }
 
-        .tune-sub {
-            font-size: 11px;
-            color: #94a3b8;
-            margin-top: 2px;
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-4px); }
+        }
+
+        /* Tıklama Yakalayıcı (Ekrana tek dokunuşla sesi açar) */
+        .click-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 5;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        .click-layer.disabled {
+            display: none;
         }
     </style>
 </head>
 <body>
 
-    <!-- Doğrudan Anında Yüklenen TV Ekranı -->
+    <!-- Video Alanı -->
     <div class="tv-screen">
         <iframe id="tvFrame" 
                 allow="autoplay; encrypted-media; fullscreen" 
@@ -133,16 +135,19 @@
         </iframe>
     </div>
 
+    <!-- Tıklama Katmanı (İlk tıklamada sesi açar ve kaybolur) -->
+    <div class="click-layer" id="clickLayer"></div>
+
     <!-- Kanal Logosu -->
     <div class="tv-logo">
         <div class="tv-live-dot"></div>
         <span>KEMAL SUNAL TV</span>
     </div>
 
-    <!-- Kanal Bilgi Şeridi -->
-    <div class="tune-banner" id="tuneBanner">
-        <div class="tune-title" id="tuneTitle">Yayın Bağlanıyor...</div>
-        <div class="tune-sub">7/24 Kesintisiz Canlı Yayın Kuşağı</div>
+    <!-- Sesi Aç Rozeti -->
+    <div class="unmute-badge" id="unmuteBadge">
+        <span>🔊</span>
+        <span>SESİ AÇMAK İÇİN TIKLAYIN</span>
     </div>
 
     <script>
@@ -172,33 +177,40 @@
             return { index: 0, id: SCHEDULE[0][0], startSeconds: 0, title: SCHEDULE[0][2] };
         }
 
-        // Anında beklemeden iframe'i başlat (HTML parsing anında)
         const live = getLiveBroadcast();
         currentIdx = live.index;
 
-        document.getElementById('tuneTitle').textContent = `🎬 Yayında: ${live.title}`;
-
+        // ÖNEMLİ: mute=1 ile başlatıyoruz!
+        // Böylece tarayıcı asla takılmaz, kırmızı oynat butonunda beklemez, ANINDA OYNATIR!
         const frame = document.getElementById('tvFrame');
-        frame.src = `https://www.youtube.com/embed/${live.id}?autoplay=1&mute=0&controls=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&start=${live.startSeconds}`;
+        frame.src = `https://www.youtube.com/embed/${live.id}?autoplay=1&mute=1&controls=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&start=${live.startSeconds}`;
 
-        // 6 saniye sonra bilgi şeridini yumuşakça gizle
-        setTimeout(() => {
-            const b = document.getElementById('tuneBanner');
-            if (b) b.classList.add('hidden');
-        }, 6000);
-
-        // YouTube API ile film bittiğinde sıradakine geçme kontrolü
+        // YouTube Iframe API ile ses ve sonraki film kontrolü
         window.onYouTubeIframeAPIReady = function() {
             player = new YT.Player('tvFrame', {
                 events: {
                     'onReady': function(e) {
                         if (player.setPlaybackQuality) player.setPlaybackQuality('hd1080');
                         player.playVideo();
+
+                        // Doğrudan sesi açmayı dene (IPTV ve TV tarayıcıları izin verir!)
+                        try {
+                            player.unMute();
+                        } catch(err) {}
+
+                        // Eğer tarayıcı sesi engellediyse "Sesi Aç" uyarısını göster
+                        setTimeout(() => {
+                            if (player.isMuted && player.isMuted()) {
+                                document.getElementById('unmuteBadge').style.display = 'flex';
+                            }
+                        }, 1500);
                     },
                     'onStateChange': function(e) {
                         if (e.data === YT.PlayerState.PLAYING) {
-                            const b = document.getElementById('tuneBanner');
-                            if (b) b.classList.add('hidden');
+                            if (player.isMuted && !player.isMuted()) {
+                                document.getElementById('unmuteBadge').style.display = 'none';
+                                document.getElementById('clickLayer').classList.add('disabled');
+                            }
                         } else if (e.data === YT.PlayerState.ENDED) {
                             playNext();
                         }
@@ -213,11 +225,6 @@
         function playNext() {
             currentIdx = (currentIdx + 1) % SCHEDULE.length;
             const nextMovie = SCHEDULE[currentIdx];
-            
-            document.getElementById('tuneTitle').textContent = `🎬 Yayında: ${nextMovie[2]}`;
-            const b = document.getElementById('tuneBanner');
-            if (b) b.classList.remove('hidden');
-            setTimeout(() => { if (b) b.classList.add('hidden'); }, 6000);
 
             if (player && player.loadVideoById) {
                 player.loadVideoById({
@@ -226,11 +233,24 @@
                     suggestedQuality: 'hd1080'
                 });
             } else {
-                frame.src = `https://www.youtube.com/embed/${nextMovie[0]}?autoplay=1&mute=0&controls=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1`;
+                frame.src = `https://www.youtube.com/embed/${nextMovie[0]}?autoplay=1&mute=1&controls=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1`;
             }
         }
 
-        // API scriptini arka planda asenkron yükle (video akışını asla bekletmez)
+        // Ekranda herhangi bir yere tıklandığında sesi aç
+        function unmuteAudio() {
+            if (player) {
+                player.unMute();
+                document.getElementById('unmuteBadge').style.display = 'none';
+                document.getElementById('clickLayer').classList.add('disabled');
+            }
+        }
+
+        document.getElementById('clickLayer').addEventListener('click', unmuteAudio);
+        document.getElementById('unmuteBadge').addEventListener('click', unmuteAudio);
+        window.addEventListener('keydown', unmuteAudio, { once: true });
+
+        // API scriptini asenkron yükle
         const tag = document.createElement('script');
         tag.src = "https://www.youtube.com/iframe_api";
         document.head.appendChild(tag);
