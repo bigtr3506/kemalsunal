@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>Kemal Sunal Sineması | 7/24 Kesintisiz TV Kuşağı</title>
+    <!-- Sinema Tarzı Fontlar ve Karanlık Sinema Teması (CSS) -->
+    <style>
+        /* Altın sarısı & koyu antrasit sinema arayüzü */
+        /* TV kumandası için odaklanabilir (focus) kart stilleri */
+        /* 16:9 Sinema ekranı ve animasyonlu canlı yayın rozetleri */
+    </style>
+</head>
+<body>
+
+    <!-- Üst Başlık: Canlı TV Rozeti ve 179 Film İçin Anında Arama Çubuğu -->
+    <header>
+        <h1>🎭 KEMAL SUNAL SİNEMASI</h1>
+        <input type="text" id="searchInput" placeholder="179 film arasında ara...">
+        <div class="live-tag">🔴 7/24 TV MODU</div>
+    </header>
+
+    <main>
+        <!-- Büyük Sinema Oynatıcısı -->
+        <section class="player-card">
+            <div id="ytplayer"></div> <!-- YouTube 1080p Player -->
+            
+            <div class="player-controls">
+                <button id="btnAutoPlay">🔁 Otomatik Sıradaki: Açık</button>
+                <button id="btnShuffle">🔀 Karışık</button>
+                <button id="btnNext">⏭️ Sonraki Film</button>
+                <button id="btnFullscreen">📺 Tam Ekran</button>
+            </div>
+        </section>
+
+        <!-- 179 Adet Kemal Sunal Filminin Afişli Listesi -->
+        <div class="movies-grid" id="moviesGrid">
+            <!-- Tosun Paşa, Şaban Oğlu Şaban, Süt Kardeşler, Kibar Feyzo, Davaro vb. -->
+        </div>
+    </main>
+
+    <!-- YouTube API & Otomatik Geçiş Motoru -->
+    <script>
+        // 179 Filmlik Temizlenmiş Veritabanı
+        const MOVIES = [
+            { "id": "guqpuNWQDhc", "title": "Tosun Paşa" },
+            { "id": "ZDoLID8feBU", "title": "Şaban Oğlu Şaban" },
+            { "id": "KRy20M7uQM4", "title": "Süt Kardeşler" },
+            { "id": "stOXnCPxOws", "title": "Kibar Feyzo" },
+            { "id": "xs9XUjHvZsM", "title": "Çöpçüler Kralı" },
+            // ... 179 film
+        ];
+
+        // 7/24 Kesintisiz Akış: Film bitince bir sonrakini başlatır
+        function onPlayerStateChange(event) {
+            if (event.data === YT.PlayerState.ENDED) {
+                playNextMovie(); // Sıradaki filme geç
+            }
+        }
+    </script>
+</body>
+</html>
