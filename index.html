@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Kemal Sunal TV | 7/24 Canlı Yayın</title>
-    <link rel="icon" href="https://img.youtube.com/vi/guqpuNWQDhc/hqdefault.jpg" type="image/jpeg">
+    
+    <!-- En Hızlı Bağlantı İçin YouTube CDN Önbellekleme -->
     <link rel="preconnect" href="https://www.youtube.com" crossorigin>
+    <link rel="preconnect" href="https://www.youtube-nocookie.com" crossorigin>
     <link rel="preconnect" href="https://i.ytimg.com" crossorigin>
+    <link rel="preconnect" href="https://googleads.g.doubleclick.net" crossorigin>
     <link rel="dns-prefetch" href="https://www.youtube.com">
-    <link rel="dns-prefetch" href="https://i.ytimg.com">
+    <link rel="dns-prefetch" href="https://www.youtube-nocookie.com">
     
     <style>
         * {
@@ -23,9 +26,10 @@
             height: 100%;
             overflow: hidden;
             background: #000;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
 
-        /* 100% Tam Ekran Gerçek TV Yayını (Butonsuz, Saf Video) */
+        /* 100% Tam Ekran TV Ekranı */
         .tv-screen {
             position: absolute;
             top: 0;
@@ -36,21 +40,20 @@
             background: #000;
         }
 
-        .tv-screen iframe, .tv-screen #ytplayer {
+        .tv-screen iframe {
             position: absolute;
             top: 50%;
             left: 50%;
             width: 100vw;
-            height: 56.25vw; /* 16:9 oranında tam ekran */
+            height: 56.25vw; /* 16:9 oran */
             min-height: 100vh;
-            min-width: 177.77vh; /* 16:9 oranında tam ekran */
+            min-width: 177.77vh; /* 16:9 oran */
             transform: translate(-50%, -50%);
             border: none;
             outline: none;
-            pointer-events: auto;
         }
 
-        /* Gerçek TV Kanalı Köşe Logosu (KEMAL SUNAL TV) */
+        /* TV Kanal Logosu */
         .tv-logo {
             position: absolute;
             top: 24px;
@@ -59,14 +62,17 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             font-size: 13px;
             font-weight: 900;
             letter-spacing: 2px;
-            color: rgba(245, 197, 24, 0.85);
+            color: rgba(245, 197, 24, 0.9);
             text-shadow: 0 2px 8px rgba(0,0,0,0.9);
             pointer-events: none;
             user-select: none;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 6px 14px;
+            border-radius: 20px;
+            backdrop-filter: blur(8px);
         }
 
         .tv-live-dot {
@@ -82,13 +88,49 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
+
+        /* Kanal Açılış / Geçiş Bilgi Şeridi */
+        .tune-banner {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            z-index: 10;
+            background: rgba(10, 12, 16, 0.85);
+            backdrop-filter: blur(12px);
+            border-left: 4px solid #f5c518;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: #fff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            transition: opacity 0.8s ease;
+            pointer-events: none;
+        }
+
+        .tune-banner.hidden {
+            opacity: 0;
+        }
+
+        .tune-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #f5c518;
+        }
+
+        .tune-sub {
+            font-size: 11px;
+            color: #94a3b8;
+            margin-top: 2px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- 100% Tam Ekran TV Ekranı -->
+    <!-- Doğrudan Anında Yüklenen TV Ekranı -->
     <div class="tv-screen">
-        <div id="ytplayer"></div>
+        <iframe id="tvFrame" 
+                allow="autoplay; encrypted-media; fullscreen" 
+                allowfullscreen>
+        </iframe>
     </div>
 
     <!-- Kanal Logosu -->
@@ -97,129 +139,101 @@
         <span>KEMAL SUNAL TV</span>
     </div>
 
-    <!-- YouTube IFrame API -->
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <!-- Kanal Bilgi Şeridi -->
+    <div class="tune-banner" id="tuneBanner">
+        <div class="tune-title" id="tuneTitle">Yayın Bağlanıyor...</div>
+        <div class="tune-sub">7/24 Kesintisiz Canlı Yayın Kuşağı</div>
+    </div>
 
     <script>
-        // 87 Filmin Listesi ve Süreleri [YouTubeID, Saniye]
-        const MOVIES = [
-            ["guqpuNWQDhc", 5139], ["rRDBKB6NHuY", 5323], ["ZDoLID8feBU", 5413], ["KRy20M7uQM4", 4833],
-            ["stOXnCPxOws", 5014], ["xs9XUjHvZsM", 4750], ["R7ttwk9kQ8s", 5023], ["-25lN6CGI1I", 4589],
-            ["BTh074l83vI", 4585], ["gPbAredRRqw", 4989], ["wmPSBa1SRA4", 4888], ["bcge5mSX090", 5642],
-            ["RCcO3Zh4ths", 5611], ["w9wgwBM3pQo", 4923], ["IpNb0BwkI2M", 5131], ["GOZ7Waq9VkQ", 4708],
-            ["T0lBFkkEY3A", 5142], ["csbsGPMmKDY", 5059], ["G7oxi4tq0Bk", 4949], ["XrpZje7tPd4", 4313],
-            ["fPkQ_2dQRUw", 5169], ["hHNdISbONpk", 4723], ["lTf-lxBbeFY", 5001], ["zRGKIhBg-Rk", 5450],
-            ["GySuqiTfZcw", 5342], ["8eSZHKpr4Kg", 5147], ["qkgAExh2WBw", 5416], ["eN41guxlp0c", 5827],
-            ["RPBofKLiBzU", 5183], ["WdGv4-VTCLI", 6414], ["So6b5qua_zc", 5428], ["lH977qBfMKc", 5429],
-            ["4rAnNKCxlnc", 5741], ["hf2-8MRPGu8", 5110], ["6M2N1dztNU0", 5542], ["3Y8nUzSbTrE", 5812],
-            ["0aPemUexAk4", 4587], ["5Q_wKlkCJsU", 5493], ["lSu7Wc5lgXc", 5115], ["yM2r8H8A_P0", 4911],
-            ["wgG6xlQ1jx8", 4907], ["4J3ulqHkgRM", 4898], ["xfn2PgMDYxw", 4616], ["eedUtTFLYsQ", 5879],
-            ["w7bwBts_d1U", 5371], ["zLc3Eh7uO2s", 4735], ["Z7oLqdR2zIA", 4903], ["-ucnLbAmfTQ", 4310],
-            ["4EJ62o4u4ug", 5522], ["HBRD_HbCwHE", 5161], ["kVyvF84zEaA", 5921], ["Fy-tddSA-5Y", 4468],
-            ["16Bv7GAoH4c", 5423], ["G62FPi5NYsU", 5615], ["pQ9GgiPPYnc", 4746], ["piFzdcn0iEY", 4917],
-            ["bOu4OJaA1Wc", 5721], ["8d97CGyglS4", 4983], ["X1sL0IMFzP8", 5083], ["aQuDq8w2MXQ", 4917],
-            ["AAldCMXkTJM", 5667], ["GICo5W3fEaw", 5356], ["vNeTCNXJXJA", 4825], ["WE0tU8cJ1Ps", 5111],
-            ["9wOPLOm0Dlc", 5173], ["aMDcX2tG-NM", 5206], ["pJxXU16tx1o", 5148], ["4nRQCiaSg-U", 5536],
-            ["0ME6gEQWdSI", 5511], ["Mt0f-RqDDVQ", 4864], ["zrxWh5zKe4I", 6222], ["C8leqNYSbrk", 4870],
-            ["BMMfgxm_C4c", 5335], ["2x1k44qhRAg", 5310], ["uY4pUWRnuu4", 5124], ["hKjlPfgW0NE", 5062],
-            ["7FKQauKZKsI", 5554], ["8j_njwgTdkc", 5124], ["Vfs1uAbef_A", 5489], ["qLTO2JqtLvk", 4733],
-            ["k05TvAwf0UU", 5328], ["3yDpAHN3lWc", 4657], ["Lom8SHAsXA8", 5003], ["a05gvIsIm-I", 4870],
-            ["lj1EZStxiBs", 5142], ["vIA9hTcrkw8", 4927], ["ZvXzoYwm-GU", 5139]
-        ];
+        const SCHEDULE = [["guqpuNWQDhc", 5139, "Tosun Paşa"], ["rRDBKB6NHuY", 5323, "Şark Bülbülü"], ["ZDoLID8feBU", 5413, "Şaban Oğlu Şaban"], ["KRy20M7uQM4", 4833, "Süt Kardeşler"], ["stOXnCPxOws", 5014, "Kibar Feyzo"], ["xs9XUjHvZsM", 4750, "Çöpçüler Kralı"], ["R7ttwk9kQ8s", 5023, "Kapıcılar Kralı 1976 & Sevda Ferdağ"], ["-25lN6CGI1I", 4589, "Korkusuz Korkak Turkish Movie"], ["BTh074l83vI", 4585, "Sahte Kabadayı"], ["gPbAredRRqw", 4989, "Yedi Bela Hüsnü Oya Aydoğan"], ["wmPSBa1SRA4", 4888, "Üç Kağıtçı"], ["bcge5mSX090", 5642, "Davaro &"], ["RCcO3Zh4ths", 5611, "Şendul Şaban Türk Film"], ["w9wgwBM3pQo", 4923, "Postacı Eski"], ["IpNb0BwkI2M", 5131, "Ortadirek Şaban Eski"], ["GOZ7Waq9VkQ", 4708, "Tokatçı"], ["T0lBFkkEY3A", 5142, "Doktor Civanım 😎"], ["csbsGPMmKDY", 5059, "Kılıbık Eski"], ["G7oxi4tq0Bk", 4949, "Atla Gel Şaban"], ["XrpZje7tPd4", 4313, "Şaşkın Damat"], ["fPkQ_2dQRUw", 5169, "İnek Şaban"], ["hHNdISbONpk", 4723, "Devlet Kuşu Eski"], ["lTf-lxBbeFY", 5001, "Gerzek Şaban"], ["zRGKIhBg-Rk", 5450, "Deli Deli Küpeli Eski"], ["GySuqiTfZcw", 5342, "Japon İşi"], ["8eSZHKpr4Kg", 5147, "Sevimli Hırsız Türk Film"], ["qkgAExh2WBw", 5416, "Uyanık Gazeteci"], ["eN41guxlp0c", 5827, "Öğretmen Eski"], ["RPBofKLiBzU", 5183, "Polizei"], ["WdGv4-VTCLI", 6414, "Talih Kuşu , Yasemin Yalçın"], ["So6b5qua_zc", 5428, "Gülen Adam"], ["lH977qBfMKc", 5429, "Gülen Adam Full"], ["4rAnNKCxlnc", 5741, "Hababam Sınıfı Uyanıyor"], ["hf2-8MRPGu8", 5110, "Hababam Sınıfı (1975)"], ["6M2N1dztNU0", 5542, "Hababam Sınıfı Sınıfta Kaldı"], ["3Y8nUzSbTrE", 5812, "Hababam Sınıfı Tatilde"], ["0aPemUexAk4", 4587, "Mavi Boncuk"], ["5Q_wKlkCJsU", 5493, "Tatlı Dillim"], ["lSu7Wc5lgXc", 5115, "Salako"], ["yM2r8H8A_P0", 4911, "Köyden İndim Şehire"], ["wgG6xlQ1jx8", 4907, "Salak Milyoner"], ["4J3ulqHkgRM", 4898, "Sakar Şaki̇r"], ["xfn2PgMDYxw", 4616, "Yoksul 1986 & Yaman Okay"], ["eedUtTFLYsQ", 5879, "Şabani̇ye"], ["w7bwBts_d1U", 5371, "Güllü Geliyor Güllü"], ["zLc3Eh7uO2s", 4735, "Dokunmayın Şabanıma Eski"], ["Z7oLqdR2zIA", 4903, "Yüz Numaralı Adam Eski"], ["-ucnLbAmfTQ", 4310, "Meraklı Köfteci"], ["4EJ62o4u4ug", 5522, "Sosyete Şaban"], ["HBRD_HbCwHE", 5161, "Oh Olsun"], ["kVyvF84zEaA", 5921, "Keriz , Perihan Savaş"], ["Fy-tddSA-5Y", 4468, "Köşeyi Dönen Adam 1978"], ["16Bv7GAoH4c", 5423, "Varyemez , Yasemin Yalçın"], ["G62FPi5NYsU", 5615, "Şaban Pabucu Yarım"], ["pQ9GgiPPYnc", 4746, "Davacı"], ["piFzdcn0iEY", 4917, "Umudumuz Şaban Eski"], ["bOu4OJaA1Wc", 5721, "En Büyük Şaban"], ["8d97CGyglS4", 4983, "Bekçiler Kralı Eski"], ["X1sL0IMFzP8", 5083, "İnatçı"], ["aQuDq8w2MXQ", 4917, "Avanak Apti"], ["AAldCMXkTJM", 5667, "Yalancı Yarim"], ["GICo5W3fEaw", 5356, "Çarıklı Milyoner"], ["vNeTCNXJXJA", 4825, "The Goal King Classic Turkish Film Full Movie"], ["WE0tU8cJ1Ps", 5111, "Tarzan Rıfkı"], ["9wOPLOm0Dlc", 5173, "Koltuk Belası"], ["aMDcX2tG-NM", 5206, "Katma Değer Şaban Eski"], ["pJxXU16tx1o", 5148, "Zehir Hafiye Full Film"], ["4nRQCiaSg-U", 5536, "Kiracı Eski"], ["0ME6gEQWdSI", 5511, "Abuk Sabuk 1 Film"], ["Mt0f-RqDDVQ", 4864, "Kanlı Nigar Eski"], ["zrxWh5zKe4I", 6222, "Propaganda 1999"], ["C8leqNYSbrk", 4870, "Bıçkın"], ["BMMfgxm_C4c", 5335, "Düttürü Dünya 1988"], ["2x1k44qhRAg", 5310, "Yakışıklı Eski"], ["uY4pUWRnuu4", 5124, "Güllü Geliyor Güllü Eski"], ["hKjlPfgW0NE", 5062, "Boynu Bükük Küheylan"], ["7FKQauKZKsI", 5554, "Longing"], ["8j_njwgTdkc", 5124, "Güllü Geliyor Güllü Türkan Şoray Ediz Hun Eski"], ["Vfs1uAbef_A", 5489, "Canım Kardeşim 1973"], ["qLTO2JqtLvk", 4733, "Hanzo Meral Zeren"], ["k05TvAwf0UU", 5328, "İbo İle Güllüşah"], ["3yDpAHN3lWc", 4657, "İyi Aile Çocuğu"], ["Lom8SHAsXA8", 5003, "Yakışıklı"], ["a05gvIsIm-I", 4870, "The Tough Guy Full Length"], ["lj1EZStxiBs", 5142, "Güllü Geliyor Güllü / 1973 Türkan Şoray , Ediz Hun , Bülent Kayabaş , , İhsan Yüce"], ["vIA9hTcrkw8", 4927, "The Simpleton Millionaire Movie , Zeki Alasya, Metin Akpınar, Halit Akç..."], ["ZvXzoYwm-GU", 5139, "Tosun Pasha Full , ,"]];
 
-        let player = null;
         let currentIdx = 0;
+        let player = null;
 
-        // Gerçek Dünya Saatiyle Eşit Canlı Yayın Hesaplama (Filmin ortasından başlar)
+        // Gerçek Dünya Saatiyle Eşit Canlı Yayın Hesaplama
         function getLiveBroadcast() {
-            const totalDuration = MOVIES.reduce((acc, m) => acc + m[1], 0);
+            const totalDuration = SCHEDULE.reduce((acc, m) => acc + m[1], 0);
             const now = Math.floor(Date.now() / 1000);
             let timeInCycle = now % totalDuration;
 
-            for (let i = 0; i < MOVIES.length; i++) {
-                const dur = MOVIES[i][1];
+            for (let i = 0; i < SCHEDULE.length; i++) {
+                const dur = SCHEDULE[i][1];
                 if (timeInCycle < dur) {
                     return {
                         index: i,
-                        id: MOVIES[i][0],
-                        startSeconds: Math.floor(timeInCycle)
+                        id: SCHEDULE[i][0],
+                        startSeconds: Math.floor(timeInCycle),
+                        title: SCHEDULE[i][2]
                     };
                 }
                 timeInCycle -= dur;
             }
-            return { index: 0, id: MOVIES[0][0], startSeconds: 0 };
+            return { index: 0, id: SCHEDULE[0][0], startSeconds: 0, title: SCHEDULE[0][2] };
         }
 
-        function onYouTubeIframeAPIReady() {
-            const live = getLiveBroadcast();
-            currentIdx = live.index;
+        // Anında beklemeden iframe'i başlat (HTML parsing anında)
+        const live = getLiveBroadcast();
+        currentIdx = live.index;
 
-            player = new YT.Player('ytplayer', {
-                videoId: live.id,
-                playerVars: {
-                    autoplay: 1,
-                    controls: 0,
-                    disablekb: 1,
-                    fs: 0,
-                    modestbranding: 1,
-                    rel: 0,
-                    playsinline: 1,
-                    iv_load_policy: 3,
-                    start: live.startSeconds // O anki canlı saniyesinden başlar
-                },
+        document.getElementById('tuneTitle').textContent = `🎬 Yayında: ${live.title}`;
+
+        const frame = document.getElementById('tvFrame');
+        frame.src = `https://www.youtube.com/embed/${live.id}?autoplay=1&mute=0&controls=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&start=${live.startSeconds}`;
+
+        // 6 saniye sonra bilgi şeridini yumuşakça gizle
+        setTimeout(() => {
+            const b = document.getElementById('tuneBanner');
+            if (b) b.classList.add('hidden');
+        }, 6000);
+
+        // YouTube API ile film bittiğinde sıradakine geçme kontrolü
+        window.onYouTubeIframeAPIReady = function() {
+            player = new YT.Player('tvFrame', {
                 events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange,
-                    'onError': onPlayerError
+                    'onReady': function(e) {
+                        if (player.setPlaybackQuality) player.setPlaybackQuality('hd1080');
+                        player.playVideo();
+                    },
+                    'onStateChange': function(e) {
+                        if (e.data === YT.PlayerState.PLAYING) {
+                            const b = document.getElementById('tuneBanner');
+                            if (b) b.classList.add('hidden');
+                        } else if (e.data === YT.PlayerState.ENDED) {
+                            playNext();
+                        }
+                    },
+                    'onError': function() {
+                        playNext();
+                    }
                 }
             });
-        }
+        };
 
-        function onPlayerReady(event) {
-            if (player.setPlaybackQuality) {
-                player.setPlaybackQuality('hd1080');
-            }
-            // Otomatik başlatma
-            const p = player.playVideo();
-            if (p && p.catch) {
-                p.catch(() => {
-                    player.mute();
-                    player.playVideo();
-                });
-            }
-        }
+        function playNext() {
+            currentIdx = (currentIdx + 1) % SCHEDULE.length;
+            const nextMovie = SCHEDULE[currentIdx];
+            
+            document.getElementById('tuneTitle').textContent = `🎬 Yayında: ${nextMovie[2]}`;
+            const b = document.getElementById('tuneBanner');
+            if (b) b.classList.remove('hidden');
+            setTimeout(() => { if (b) b.classList.add('hidden'); }, 6000);
 
-        // Film bitince sıradakine otomatik geç (7/24 döngü)
-        function onPlayerStateChange(event) {
-            if (event.data === YT.PlayerState.PLAYING) {
-                if (player.setPlaybackQuality) {
-                    player.setPlaybackQuality('hd1080');
-                }
-            } else if (event.data === YT.PlayerState.ENDED) {
-                currentIdx = (currentIdx + 1) % MOVIES.length;
+            if (player && player.loadVideoById) {
                 player.loadVideoById({
-                    videoId: MOVIES[currentIdx][0],
+                    videoId: nextMovie[0],
                     startSeconds: 0,
                     suggestedQuality: 'hd1080'
                 });
+            } else {
+                frame.src = `https://www.youtube.com/embed/${nextMovie[0]}?autoplay=1&mute=0&controls=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1`;
             }
         }
 
-        function onPlayerError(event) {
-            currentIdx = (currentIdx + 1) % MOVIES.length;
-            player.loadVideoById({
-                videoId: MOVIES[currentIdx][0],
-                startSeconds: 0,
-                suggestedQuality: 'hd1080'
-            });
-        }
-
-        // Ekrana ilk dokunulduğunda ses kapalıysa sesi aç
-        window.addEventListener('click', () => {
-            if (player && player.isMuted && player.isMuted()) {
-                player.unMute();
-            }
-        }, { once: true });
+        // API scriptini arka planda asenkron yükle (video akışını asla bekletmez)
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(tag);
     </script>
 </body>
 </html>
